@@ -3,8 +3,25 @@
 {
   imports = [ ./nix_settings.nix ] ++ import ./modules/module_list.nix;
 
-  # List of packages installed in system profile.
-  environment.systemPackages = [ pkgs.nil pkgs.nixpkgs-fmt pkgs.vim ];
+  environment.systemPackages = [
+    pkgs.nil
+    pkgs.nixpkgs-fmt
+    pkgs.vim
+    pkgs.awscli2
+    pkgs.python39Full
+    pkgs.ripgrep
+    pkgs.jq
+    pkgs.ffmpeg
+    pkgs.imagemagick
+    pkgs.htop
+    pkgs.curl
+    pkgs.inetutils
+    pkgs.findutils
+    pkgs.coreutils
+    pkgs.moreutils
+    pkgs.tokei
+    pkgs.git
+  ];
 
   deno.enable = true;
 
