@@ -9,15 +9,11 @@
   # $ darwin-rebuild changelog
   system.stateVersion = 4;
 
-  # Forcing ARM just in case.
-  nixpkgs.system = "aarch64-darwin";
-
   # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
 
   # Changing the nix settings so that they match flox.
   nix.settings = {
-    extra-platforms = "aarch64-darwin";
     auto-optimise-store = true;
     sandbox = true;
     sandbox-fallback = false;
