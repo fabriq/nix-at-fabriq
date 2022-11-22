@@ -16,6 +16,6 @@ in
   };
 
   config = mkIf cfg.enable {
-    security.pki.certificateFiles = [ ./cloudflare.crt ];
+    security.pki.certificateFiles = [ ./cloudflare.pem ];
   };
 }
