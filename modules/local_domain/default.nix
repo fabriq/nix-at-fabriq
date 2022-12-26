@@ -58,6 +58,8 @@ in
   config = mkIf cfg.enable {
     environment.systemPackages = [ cfg.dnsmasq cfg.nginx ];
 
+    security.pki.certificateFiles = [ ./cert/fabriq.test.crt ];
+
     launchd.daemons.dnsmasq = {
       path = [ cfg.dnsmasq ];
       serviceConfig = {
