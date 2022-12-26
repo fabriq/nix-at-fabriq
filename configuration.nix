@@ -15,7 +15,6 @@
     pkgs.imagemagick
     pkgs.htop
     pkgs.curl
-    pkgs.inetutils
     pkgs.findutils
     pkgs.coreutils
     pkgs.moreutils
