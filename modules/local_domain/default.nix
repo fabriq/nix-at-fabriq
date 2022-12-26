@@ -50,7 +50,7 @@ in
 
     local_domain.logs_directory = mkOption {
       type = types.str;
-      default = "/var/log/local_domain";
+      default = "/var/log/local-domain";
       description = "The directory in which to store logs";
     };
   };
@@ -60,7 +60,19 @@ in
 
     security.pki.certificateFiles = [ ./cert/fabriq.test.crt ];
 
-    launchd.daemons.dnsmasq = {
+    launchd.daemons."local-domain.alias" = mkIf (cfg.ip_address != "127.0.0.1") {
+      serviceConfig = {
+        ProgramArguments = [ "/sbin/ifconfig" "lo0" "alias" cfg.ip_address ];
+        RunAtLoad = true;
+        Nice = 10;
+        KeepAlive = false;
+        AbandonProcessGroup = true;
+        StandardOutPath = "${cfg.logs_directory}/daemons/alias/stdout.log";
+        StandardErrorPath = "${cfg.logs_directory}/daemons/alias/stderr.log";
+      };
+    };
+
+    launchd.daemons."local-domain.dnsmasq" = {
       path = [ cfg.dnsmasq ];
       serviceConfig = {
         Program = "${cfg.dnsmasq}/bin/dnsmasq";
@@ -72,10 +84,15 @@ in
           "--keep-in-foreground"
         ];
 
-        KeepAlive = true;
+
+        KeepAlive = {
+          OtherJobEnabled = mkIf (cfg.ip_address != "127.0.0.1") {
+            "org.nixos.local-domain.alias" = true;
+          };
+        };
         RunAtLoad = true;
-        StandardOutPath = "${cfg.logs_directory}/dnsmasq.log";
-        StandardErrorPath = "${cfg.logs_directory}/dnsmasq_error.log";
+        StandardOutPath = "${cfg.logs_directory}/daemons/dnsmasq/stdout.log";
+        StandardErrorPath = "${cfg.logs_directory}/daemons/dnsmasq/stderr.log";
       };
     };
 
@@ -87,7 +104,7 @@ in
       '';
     };
 
-    launchd.daemons.nginx =
+    launchd.daemons."local-domain.nginx" =
       let
         nginxConfig = ''
           worker_processes  1;
@@ -97,10 +114,16 @@ in
           }
 
           http {
-              include       ${cfg.nginx}/conf/mime.types;
-              default_type  application/octet-stream;
-              sendfile        on;
+              include            ${cfg.nginx}/conf/mime.types;
+              default_type       application/octet-stream;
+              sendfile           on;
               keepalive_timeout  65;
+
+              # By default, nginx will write its logs in /var/log/nginx.
+              # We don't want this instance of nginx to conflict with another.
+              access_log         ${cfg.logs_directory}/nginx/access.log;
+              error_log          ${cfg.logs_directory}/nginx/error.log;
+
               server {
                  listen       ${cfg.ip_address}:443 ssl;
                  server_name  *.${cfg.domain};
@@ -124,35 +147,22 @@ in
       in
       {
         path = [ cfg.nginx ];
+        script = ''
+          set -e
+          ${pkgs.coreutils}/bin/mkdir -p ${cfg.logs_directory}/nginx
+          exec ${cfg.nginx}/bin/nginx -c ${pkgs.writeText "nginx.conf" nginxConfig} -e ${cfg.logs_directory}/nginx/error.log -p ${pkgs.nginx}/empty -g 'daemon off;'
+        '';
         serviceConfig = {
-          Program = "${cfg.nginx}/bin/nginx";
-          ProgramArguments = [
-            "nginx"
-            "-c"
-            "${pkgs.writeText "nginx.conf" nginxConfig}"
-            "-p"
-            "${pkgs.nginx}/empty"
-            "-g"
-            "daemon off;"
-          ];
-          KeepAlive = true;
+          KeepAlive = {
+            OtherJobEnabled = {
+              "org.nixos.local-domain.dnsmasq" = true;
+            };
+          };
           RunAtLoad = true;
           WorkingDirectory = "${pkgs.nginx}/conf";
-          StandardOutPath = "${cfg.logs_directory}/nginx.log";
-          StandardErrorPath = "${cfg.logs_directory}/nginx_error.log";
+          StandardOutPath = "${cfg.logs_directory}/daemons/nginx/stdout.log";
+          StandardErrorPath = "${cfg.logs_directory}/daemons/nginx/stderr.log";
         };
       };
-
-    launchd.daemons.aliasForIpPortForwarder = mkIf (cfg.ip_address != "127.0.0.1") {
-      serviceConfig = {
-        ProgramArguments = [ "/sbin/ifconfig" "lo0" "alias" cfg.ip_address ];
-        RunAtLoad = true;
-        Nice = 10;
-        KeepAlive = false;
-        AbandonProcessGroup = true;
-        StandardOutPath = "${cfg.logs_directory}/alias_for_ip_forwarder.log";
-        StandardErrorPath = "${cfg.logs_directory}/alias_for_ip_forwarder_error.log";
-      };
-    };
   };
 }
