@@ -28,6 +28,13 @@ in
       description = "This option specifies the nginx package to use.";
     };
 
+    local_domain.cacert = mkOption {
+      type = types.path;
+      default = pkgs.cacert;
+      defaultText = "pkgs.cacert";
+      description = "This option specifies the cacert package to install; it is here to prevent an unregistered scheme error.";
+    };
+
     local_domain.ip_address = mkOption {
       type = types.str;
       default = "127.0.0.1";
