@@ -106,7 +106,15 @@ in
 
     launchd.daemons."local-domain.nginx" =
       let
+        # By default, nginx will write its logs in /var/log/nginx.
+        # We don't want this instance of nginx to conflict with another,
+        # so we are overwriting it.
+        nginxLogDirectory = "${cfg.logs_directory}/nginx";
+        accessLogFile = "${nginxLogDirectory}/access.log";
+        errorLogFile = "${nginxLogDirectory}/error.log";
+        pidFile = "${nginxLogDirectory}/nginx.pid";
         nginxConfig = ''
+          pid               ${pidFile};
           worker_processes  1;
 
           events {
@@ -119,10 +127,8 @@ in
               sendfile           on;
               keepalive_timeout  65;
 
-              # By default, nginx will write its logs in /var/log/nginx.
-              # We don't want this instance of nginx to conflict with another.
-              access_log         ${cfg.logs_directory}/nginx/access.log;
-              error_log          ${cfg.logs_directory}/nginx/error.log;
+              access_log         ${accessLogFile};
+              error_log          ${errorLogFile};
 
               server {
                  listen       ${cfg.ip_address}:443 ssl;
@@ -149,8 +155,9 @@ in
         path = [ cfg.nginx ];
         script = ''
           set -e
-          ${pkgs.coreutils}/bin/mkdir -p ${cfg.logs_directory}/nginx
-          exec ${cfg.nginx}/bin/nginx -c ${pkgs.writeText "nginx.conf" nginxConfig} -e ${cfg.logs_directory}/nginx/error.log -p ${pkgs.nginx}/empty -g 'daemon off;'
+          ${pkgs.coreutils}/bin/mkdir -p ${nginxLogDirectory}
+          ${pkgs.coreutils}/bin/touch ${pidFile} ${accessLogFile} ${errorLogFile}
+          exec ${cfg.nginx}/bin/nginx -c ${pkgs.writeText "nginx.conf" nginxConfig} -e ${errorLogFile} -p ${pkgs.nginx}/empty -g 'daemon off;'
         '';
         serviceConfig = {
           KeepAlive = {
