@@ -15,7 +15,6 @@
     pkgs.jq
     pkgs.ffmpeg
     pkgs.imagemagick
-    pkgs.htop
     pkgs.curl
     pkgs.inetutils
     pkgs.findutils
