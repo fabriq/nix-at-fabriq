@@ -15,6 +15,6 @@
           system = "x86_64-darwin";
           modules = sharedModules ++ [ ./common deviceModule ];
         })
-       (import ./hosts);
+        (import ./hosts);
   };
 }
