@@ -135,8 +135,11 @@ in
               access_log            ${accessLogFile};
               error_log             ${errorLogFile};
 
-              client_body_temp_path ${clientBodyTempPath};
-              proxy_temp_path       ${proxyTempPath};
+              client_body_temp_path ${nginxTmpDirectory}/client_body;
+              proxy_temp_path       ${nginxTmpDirectory}/proxy;
+              fastcgi_temp_path     ${nginxTmpDirectory}/fastcgi;
+              uwsgi_temp_path       ${nginxTmpDirectory}/uwsgi;
+              scgi_temp_path        ${nginxTmpDirectory}/scgi;
 
               server {
                  listen       ${cfg.ip_address}:443 ssl;
@@ -163,7 +166,7 @@ in
         path = [ cfg.nginx ];
         script = ''
           set -e
-          ${pkgs.coreutils}/bin/mkdir -p ${nginxLogDirectory} ${clientBodyTempPath} ${proxyCachePath} ${proxyTempPath}
+          ${pkgs.coreutils}/bin/mkdir -p ${nginxLogDirectory} ${nginxTmpDirectory}
           ${pkgs.coreutils}/bin/touch ${pidFile} ${accessLogFile} ${errorLogFile}
           exec ${cfg.nginx}/bin/nginx -c ${pkgs.writeText "nginx.conf" nginxConfig} -e ${errorLogFile} -p ${pkgs.nginx}/empty -g 'daemon off;'
         '';
