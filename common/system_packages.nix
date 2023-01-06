@@ -21,6 +21,7 @@
     pkgs.findutils
     pkgs.coreutils
     pkgs.moreutils
+    pkgs.gnugrep
     pkgs.gnused
     pkgs.tokei
     pkgs.git
