@@ -113,6 +113,7 @@ in
         accessLogFile = "${nginxLogDirectory}/access.log";
         errorLogFile = "${nginxLogDirectory}/error.log";
         pidFile = "${nginxLogDirectory}/nginx.pid";
+        clientBodyCacheDirectory = "/tmp/local-domain/nginx/client_body";
         nginxConfig = ''
           pid               ${pidFile};
           worker_processes  1;
@@ -122,13 +123,15 @@ in
           }
 
           http {
-              include            ${cfg.nginx}/conf/mime.types;
-              default_type       application/octet-stream;
-              sendfile           on;
-              keepalive_timeout  65;
+              include               ${cfg.nginx}/conf/mime.types;
+              default_type          application/octet-stream;
+              sendfile              on;
+              keepalive_timeout     65;
 
-              access_log         ${accessLogFile};
-              error_log          ${errorLogFile};
+              access_log            ${accessLogFile};
+              error_log             ${errorLogFile};
+
+              client_body_temp_path ${clientBodyCacheDirectory};
 
               server {
                  listen       ${cfg.ip_address}:443 ssl;
@@ -155,7 +158,7 @@ in
         path = [ cfg.nginx ];
         script = ''
           set -e
-          ${pkgs.coreutils}/bin/mkdir -p ${nginxLogDirectory}
+          ${pkgs.coreutils}/bin/mkdir -p ${nginxLogDirectory} ${clientBodyCacheDirectory}
           ${pkgs.coreutils}/bin/touch ${pidFile} ${accessLogFile} ${errorLogFile}
           exec ${cfg.nginx}/bin/nginx -c ${pkgs.writeText "nginx.conf" nginxConfig} -e ${errorLogFile} -p ${pkgs.nginx}/empty -g 'daemon off;'
         '';
