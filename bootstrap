@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -ex
+
+echo "Type your first name in lowercase"
+read name
+
+sudo scutil --set HostName $(sudo scutil --get ComputerName)
+sudo scutil --set LocalHostName $(sudo scutil --get ComputerName)
+
+DIR=$(mktemp -d)
+nix build ".#darwinConfigurations.$(hostname).system" --extra-experimental-features "nix-command flakes" -o $DIR/result
+$DIR/result/sw/bin/darwin-rebuild switch --flake .

@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+echo "Type the username of the engineer, which is the part before the @ in their main email address"
+read username
+
+echo "Type the model of Macbook the engineer will be using (mbp for Macbook Pro; mba for Macbook Air)"
+read model
+
+host=fabriq-$username-$model
+
+mkdir -p ./hosts/$username
+
+cat <<EOF >>./hosts/$username/default.nix
+{ config, pkgs, ... }:
+
+{ }
+
+EOF
