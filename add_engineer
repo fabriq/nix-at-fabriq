@@ -18,3 +18,5 @@ cat <<EOF >>./hosts/$username/default.nix
 { }
 
 EOF
+
+sed 's/^}$/'"  $host = .\/$username;"'\n}/' -i hosts/default.nix
