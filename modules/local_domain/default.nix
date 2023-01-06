@@ -136,7 +136,6 @@ in
               error_log             ${errorLogFile};
 
               client_body_temp_path ${clientBodyTempPath};
-              proxy_cache_path      ${proxyCachePath};
               proxy_temp_path       ${proxyTempPath};
 
               server {
