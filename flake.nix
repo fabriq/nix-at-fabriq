@@ -8,15 +8,13 @@
   };
 
   outputs = { self, darwin, nixpkgs }: {
-    # FIXME The hostnames are hardcoded for now. This must be generalized.
-
-    darwinConfigurations."fabriq-yacine-lt" = darwin.lib.darwinSystem {
-      system = "x86_64-darwin";
-      modules = [ ./configuration.nix ];
-    };
-    darwinConfigurations."fabriq-mohamed-lt" = darwin.lib.darwinSystem {
-      system = "x86_64-darwin";
-      modules = [ ./configuration.nix ];
-    };
+    darwinConfigurations =
+      let sharedModules = import ./modules; in
+      builtins.mapAttrs
+        (hostname: deviceModule: darwin.lib.darwinSystem {
+          system = "x86_64-darwin";
+          modules = sharedModules ++ [ ./common deviceModule ];
+        })
+       (import ./hosts);
   };
 }

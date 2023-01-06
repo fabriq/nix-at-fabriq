@@ -1,10 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  # Use a custom configuration.nix location.
-  # $ darwin-rebuild switch -I darwin-config=$HOME/.nixpkgs/darwin-configuration.nix
-  environment.darwinConfig = "$HOME/.nixpkgs/darwin-configuration.nix";
-
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
   system.stateVersion = 4;
