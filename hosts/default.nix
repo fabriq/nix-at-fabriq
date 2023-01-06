@@ -3,4 +3,5 @@
 {
   fabriq-mohamed-mbp = ./mohamed;
   fabriq-yacine-mbp-byob = ./yacine;
+  fabriq-david-mbp = ./david;
 }
