@@ -21,6 +21,7 @@
     pkgs.findutils
     pkgs.coreutils
     pkgs.moreutils
+    pkgs.gnused
     pkgs.tokei
     pkgs.git
   ];
