@@ -24,6 +24,7 @@
     pkgs.gnused
     pkgs.tokei
     pkgs.git
+    pkgs.htop
   ];
 }
 
