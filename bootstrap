@@ -11,4 +11,8 @@ security export -t certs -f pemseq -k /System/Library/Keychains/SystemRootCertif
 export SSL_CERT_FILE=$DIR/bundle.pem
 
 nix build ".#darwinConfigurations.$(hostname).system" --extra-experimental-features "nix-command flakes" -o $DIR/result
+
+printf 'run\tprivate/var/run\n' | sudo tee -a /etc/synthetic.conf
+/System/Library/Filesystems/apfs.fs/Contents/Resources/apfs.util -t # For Big Sur and later
+
 $DIR/result/sw/bin/darwin-rebuild switch --flake .
