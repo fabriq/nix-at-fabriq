@@ -5,3 +5,5 @@
 # How do we update the lockfile
 
 # How do we setup project-specific environments?
+
+# How to uninstall a package?
